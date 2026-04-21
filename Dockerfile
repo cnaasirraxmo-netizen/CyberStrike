@@ -1,35 +1,41 @@
+# Use the latest official Bun image
 FROM oven/bun:latest
 
 WORKDIR /app
 
+# Set non-interactive for apt installations
 ENV DEBIAN_FRONTEND=noninteractive
+# Disable husky during install
 ENV HUSKY=0
 
-# Ku rakib git iyo qalabka kale (haddii loo baahdo)
+# Install build dependencies
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-# Koobiyeey dhammaan faylasha ka hor rakibidda
+# Copy EVERYTHING first to ensure all workspace package.json files,
+# Catalogs, patches, and configurations are present for bun install.
+# This avoids "Workspace not found" errors during the install phase.
 COPY . .
 
-# Haddii aad rabto inaad ka tagto faylasha aan loo baahnayn, adeegso .dockerignore (eeg hoos)
-
-# Rakib qalabka
+# Install dependencies
 RUN bun install
 
-# Haddii aad u baahan tahay inaad sameyso fayl models-snapshot.ts
+# Generate a dummy models-snapshot.ts if it's missing (project-specific build requirement)
 RUN mkdir -p packages/cyberstrike/src/provider && \
     if [ ! -f packages/cyberstrike/src/provider/models-snapshot.ts ]; then \
     echo "export const snapshot = { models: [] } as const" > packages/cyberstrike/src/provider/models-snapshot.ts; \
     fi
 
-# Dhismo (build)
+# Build the application
 RUN bun run build
 
+# Expose the default port
 EXPOSE 4096
 
+# Set environment variables
 ENV NODE_ENV=production
 ENV PORT=4096
 ENV CYBERSTRIKE_SERVER_PASSWORD=cyberstrike
 ENV CYBERSTRIKE_SERVER_HOSTNAME=0.0.0.0
 
+# Start command
 CMD ["bun", "run", "--cwd", "packages/cyberstrike", "src/index.ts", "web", "--hostname", "0.0.0.0"]
