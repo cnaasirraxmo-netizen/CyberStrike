@@ -2,34 +2,12 @@
 FROM oven/bun:1.1.20 as base
 WORKDIR /app
 
-# Copy root package files
-COPY package.json bun.lock ./
-
-# Copy all package.json files to maintain workspace structure
-COPY packages/sdk/js/package.json ./packages/sdk/js/
-COPY packages/script/package.json ./packages/script/
-COPY packages/app/package.json ./packages/app/
-COPY packages/function/package.json ./packages/function/
-COPY packages/console/resource/package.json ./packages/console/resource/
-COPY packages/console/app/package.json ./packages/console/app/
-COPY packages/console/function/package.json ./packages/console/function/
-COPY packages/console/core/package.json ./packages/console/core/
-COPY packages/console/mail/package.json ./packages/console/mail/
-COPY packages/plugin/package.json ./packages/plugin/
-COPY packages/util/package.json ./packages/util/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/slack/package.json ./packages/slack/
-COPY packages/cyberstrike/package.json ./packages/cyberstrike/
-COPY packages/enterprise/package.json ./packages/enterprise/
-
-# Copy patches (required for bun install)
-COPY patches ./patches
+# Copy the entire project first to ensure all workspace package.json files
+# and bun configuration (including catalogs) are present for installation.
+COPY . .
 
 # Install all dependencies
 RUN bun install
-
-# Copy the rest of the application
-COPY . .
 
 # Generate a dummy models-snapshot.ts if it doesn't exist
 RUN if [ ! -f packages/cyberstrike/src/provider/models-snapshot.ts ]; then \
@@ -44,7 +22,7 @@ RUN bun run build
 FROM oven/bun:1.1.20-slim
 WORKDIR /app
 
-# Install runtime dependencies
+# Install runtime dependencies (like git)
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 # Copy built artifacts and necessary files from base
