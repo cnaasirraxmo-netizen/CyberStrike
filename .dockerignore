@@ -1,0 +1,16 @@
+node_modules
+.git
+.claude
+.cyberstrike
+.vscode
+dist
+.husky
+.signpath
+github
+infra
+knowledge
+nix
+packages/**/node_modules
+packages/**/dist
+*.log
+.DS_Store

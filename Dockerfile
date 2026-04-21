@@ -2,12 +2,19 @@
 FROM oven/bun:1.1.20 as base
 WORKDIR /app
 
-# Copy the entire project first to ensure all workspace package.json files
-# and bun configuration (including catalogs) are present for installation.
+# Set non-interactive for apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies if needed
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Copy the entire project
+# We use .dockerignore to skip node_modules etc.
 COPY . .
 
 # Install all dependencies
-RUN bun install
+# We use --frozen-lockfile for production builds
+RUN bun install --frozen-lockfile
 
 # Generate a dummy models-snapshot.ts if it doesn't exist
 RUN if [ ! -f packages/cyberstrike/src/provider/models-snapshot.ts ]; then \
