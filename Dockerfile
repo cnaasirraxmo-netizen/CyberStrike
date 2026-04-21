@@ -1,18 +1,29 @@
-# Isticmaal Bun image (CyberStrike wuxuu ku qoran yahay TypeScript)
 FROM oven/bun:latest
 
-# Deji goobta shaqada
 WORKDIR /app
 
-# Nuqul qaab-dhismeedka faylasha iyo rakibida
-COPY package.json bun.lockb ./
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HUSKY=0
+
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+COPY package.json ./
 RUN bun install
 
-# Nuqul wakiilada iyo qaybaha kale
 COPY . .
 
-# Deji deegaanka (environment)
-ENV NODE_ENV=production
+RUN mkdir -p packages/cyberstrike/src/provider && \
+    if [ ! -f packages/cyberstrike/src/provider/models-snapshot.ts ]; then \
+    echo "export const snapshot = { models: [] } as const" > packages/cyberstrike/src/provider/models-snapshot.ts; \
+    fi
 
-# Amarka bilawga ee CyberStrike
-CMD ["bun", "run", "cyberstrike"]
+RUN bun run build
+
+EXPOSE 4096
+
+ENV NODE_ENV=production
+ENV PORT=4096
+ENV CYBERSTRIKE_SERVER_PASSWORD=cyberstrike
+ENV CYBERSTRIKE_SERVER_HOSTNAME=0.0.0.0
+
+CMD ["bun", "run", "--cwd", "packages/cyberstrike", "src/index.ts", "web", "--hostname", "0.0.0.0"]
