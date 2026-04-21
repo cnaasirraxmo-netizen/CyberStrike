@@ -22,6 +22,9 @@ COPY packages/slack/package.json ./packages/slack/
 COPY packages/cyberstrike/package.json ./packages/cyberstrike/
 COPY packages/enterprise/package.json ./packages/enterprise/
 
+# Copy patches (required for bun install)
+COPY patches ./patches
+
 # Install all dependencies
 RUN bun install
 
