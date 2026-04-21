@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { readdir, writeFile } from "fs/promises"
+import { existsSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
 import { config } from "../src/config.js"
@@ -43,6 +44,11 @@ async function getMainRoutes(): Promise<SitemapEntry[]> {
 
 async function getDocsRoutes(): Promise<SitemapEntry[]> {
   const routes: SitemapEntry[] = []
+
+  if (!existsSync(DOCS_DIR)) {
+    console.log("Docs directory missing, skipping docs routes")
+    return routes
+  }
 
   try {
     const files = await readdir(DOCS_DIR)

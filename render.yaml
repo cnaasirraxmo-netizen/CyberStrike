@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: cyberstrike
+    env: docker
+    plan: starter # Starter plan or higher is required for persistent disks on Render
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 4096
+      - key: CYBERSTRIKE_SERVER_PASSWORD
+        generateValue: true
+      - key: CYBERSTRIKE_SERVER_HOSTNAME
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: cyberstrike-data
+      mountPath: /root/.local/share/cyberstrike
+      sizeGB: 1
