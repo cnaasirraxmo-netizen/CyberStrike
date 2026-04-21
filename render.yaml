@@ -2,7 +2,7 @@ services:
   - type: web
     name: cyberstrike
     env: docker
-    plan: starter # Persistent disks require the Starter plan
+    plan: starter # Starter plan or higher is required for persistent disks on Render
     region: oregon
     envVars:
       - key: PORT
